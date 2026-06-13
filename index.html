@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="az">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Packet Tracer Lab — Tam Konfiqurasiya Bələdçisi</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --panel: #131922;
+      --panel-2: #0a0f15;
+      --line: #1f2a36;
+      --text: #d6e2ec;
+      --muted: #7d8fa3;
+      --accent: #39d6c4;
+      --accent-2: #ffb454;
+      --warn: #ff6b6b;
+      --code-bg: #060a0f;
+      --mono: "SF Mono", "JetBrains Mono", "Fira Code", Consolas, monospace;
+      --sans: "Inter", "Segoe UI", system-ui, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    /* subtle grid background, like a network topology canvas */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(var(--line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--line) 1px, transparent 1px);
+      background-size: 48px 48px;
+      opacity: 0.25;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .wrap {
+      position: relative;
+      z-index: 1;
+      max-width: 880px;
+      margin: 0 auto;
+      padding: 48px 24px 96px;
+    }
+
+    header {
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 28px;
+      margin-bottom: 36px;
+    }
+
+    .tag {
+      display: inline-block;
+      font-family: var(--mono);
+      font-size: 12px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      border: 1px solid var(--accent);
+      border-radius: 999px;
+      padding: 4px 12px;
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      font-size: clamp(28px, 5vw, 42px);
+      margin: 0 0 10px;
+      letter-spacing: -0.01em;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 15px;
+      max-width: 620px;
+    }
+
+    /* download card */
+    .download-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 20px 24px;
+      margin: 28px 0 0;
+    }
+
+    .download-card .meta {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .pdf-icon {
+      width: 42px;
+      height: 42px;
+      flex-shrink: 0;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--warn), #c0392b);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--mono);
+      font-weight: 700;
+      font-size: 11px;
+      color: #fff;
+    }
+
+    .download-card .name {
+      font-weight: 600;
+      font-size: 15px;
+    }
+
+    .download-card .sub {
+      color: var(--muted);
+      font-size: 13px;
+      font-family: var(--mono);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--accent);
+      color: #04201c;
+      font-weight: 700;
+      font-size: 14px;
+      text-decoration: none;
+      padding: 11px 20px;
+      border-radius: 10px;
+      transition: transform .15s ease, box-shadow .15s ease;
+      white-space: nowrap;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(57, 214, 196, 0.25);
+    }
+
+    /* IP plan table */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 18px 0 8px;
+      font-family: var(--mono);
+      font-size: 13px;
+    }
+
+    th,
+    td {
+      border: 1px solid var(--line);
+      padding: 9px 12px;
+      text-align: left;
+    }
+
+    th {
+      background: var(--panel);
+      color: var(--accent);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-size: 11px;
+    }
+
+    td {
+      background: var(--panel-2);
+    }
+
+    /* sections */
+    section.block {
+      margin-top: 56px;
+    }
+
+    .block-head {
+      display: flex;
+      align-items: baseline;
+      gap: 14px;
+      margin-bottom: 10px;
+    }
+
+    .block-num {
+      font-family: var(--mono);
+      font-size: 13px;
+      color: var(--accent-2);
+      border: 1px solid var(--accent-2);
+      border-radius: 6px;
+      padding: 2px 8px;
+      flex-shrink: 0;
+    }
+
+    .block-head h2 {
+      margin: 0;
+      font-size: 20px;
+    }
+
+    .steps {
+      color: var(--muted);
+      font-size: 14px;
+      margin: 6px 0 18px;
+    }
+
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 18px 0;
+      overflow-x: auto;
+      font-family: var(--mono);
+      font-size: 13px;
+      line-height: 1.85;
+    }
+
+    pre code {
+      display: block;
+    }
+
+    .line {
+      display: flex;
+      padding: 0 18px;
+      white-space: pre;
+    }
+
+    .line:hover {
+      background: rgba(57, 214, 196, 0.06);
+    }
+
+    .code-text {
+      color: var(--text);
+      flex-shrink: 0;
+    }
+
+    .note {
+      color: var(--muted);
+      font-style: italic;
+      margin-left: 24px;
+      white-space: normal;
+    }
+
+    /* variable highlight + comment */
+    .var {
+      color: var(--accent-2);
+      font-weight: 700;
+      border-bottom: 1px dashed var(--accent-2);
+    }
+
+    .comment {
+      color: #5b7184;
+      font-style: italic;
+      margin-left: 16px;
+      white-space: normal;
+    }
+
+    .comment::before {
+      content: "// ";
+      opacity: 0.6;
+    }
+
+    .legend {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-left: 3px solid var(--accent-2);
+      border-radius: 10px;
+      padding: 14px 18px;
+      font-size: 14px;
+      color: var(--text);
+      margin: 14px 0 22px;
+    }
+
+    .legend strong {
+      color: var(--accent-2);
+    }
+
+    .warn-box {
+      background: rgba(255, 107, 107, 0.08);
+      border: 1px solid rgba(255, 107, 107, 0.35);
+      border-radius: 10px;
+      padding: 14px 18px;
+      font-size: 14px;
+      margin-top: 18px;
+    }
+
+    .warn-box strong {
+      color: var(--warn);
+    }
+
+    .pc-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 14px;
+      margin-top: 14px;
+    }
+
+    .pc-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 14px 16px;
+      font-family: var(--mono);
+      font-size: 13px;
+    }
+
+    .pc-card h3 {
+      margin: 0 0 8px;
+      font-size: 14px;
+      color: var(--accent);
+      font-family: var(--sans);
+    }
+
+    .pc-card div {
+      color: var(--muted);
+    }
+
+    .pc-card span {
+      color: var(--text);
+    }
+
+    footer {
+      margin-top: 64px;
+      padding-top: 24px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    code.inline {
+      font-family: var(--mono);
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      padding: 1px 6px;
+      font-size: 0.9em;
+      color: var(--accent);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+
+    <header>
+      <span class="tag">Cisco Packet Tracer · Lab Guide</span>
+      <h1>Bütöv Laboratoriya Konfiqurasiya Bələdçisi</h1>
+      <p class="subtitle">
+        Section 1, 2, 3 və 4 — bütün CLI əmrləri tək sənəddə. Aşağıda PDF-in tam məzmunu və
+        hər bir cihaza görə nəyin sənin öz topologiyana uyğun <strong>dəyişə biləcəyi</strong> qeyd olunub.
+      </p>
+
+      <div class="download-card">
+        <div class="meta">
+          <div class="pdf-icon">PDF</div>
+          <div>
+            <div class="name">Butun_Sectionlar_Tam_Konfiqurasiya.pdf</div>
+            <div class="sub">Section 1–4 · CLI əmrləri</div>
+          </div>
+        </div>
+        <a class="btn" href="net.pdf" download>
+          ⬇ PDF-i yüklə
+        </a>
+      </div>
+    </header>
+
+    <section class="block">
+      <div class="block-head">
+        <span class="block-num">PLAN</span>
+        <h2>Hesablanmış IP Planlama Cədvəli</h2>
+      </div>
+      <p class="steps">Subnet: <code class="inline">192.168.10.0/24</code></p>
+
+      <table>
+        <tr>
+          <th>Cihaz</th>
+          <th>IP Adresi</th>
+          <th>Subnet Mask</th>
+          <th>Default Gateway</th>
+        </tr>
+        <tr>
+          <td>PC1</td>
+          <td class="var">192.168.10.1</td>
+          <td>255.255.255.0</td>
+          <td class="var">192.168.10.254</td>
+        </tr>
+        <tr>
+          <td>PC2</td>
+          <td class="var">192.168.10.2</td>
+          <td>255.255.255.0</td>
+          <td class="var">192.168.10.254</td>
+        </tr>
+        <tr>
+          <td>PC3</td>
+          <td class="var">192.168.10.3</td>
+          <td>255.255.255.0</td>
+          <td class="var">192.168.10.254</td>
+        </tr>
+        <tr>
+          <td>PC4</td>
+          <td class="var">192.168.10.4</td>
+          <td>255.255.255.0</td>
+          <td class="var">192.168.10.254</td>
+        </tr>
+        <tr>
+          <td>Sw1 (VLAN 1)</td>
+          <td class="var">192.168.10.5</td>
+          <td>255.255.255.0</td>
+          <td class="var">192.168.10.254</td>
+        </tr>
+        <tr>
+          <td>R1 (Gig0/0)</td>
+          <td class="var">192.168.10.254</td>
+          <td>255.255.255.0</td>
+          <td>-</td>
+        </tr>
+      </table>
+
+      <div class="legend">
+        <strong>Diqqət:</strong> Bu cədvəldəki bütün rəqəmlər <code class="inline">192.168.10.0/24</code> şəbəkəsinə
+        görə hesablanıb. Əgər sənin tapşırığında verilən şəbəkə ünvanı (məs. <code class="inline">192.168.20.0/24</code>
+        və ya <code class="inline">172.16.5.0/24</code> kimi) fərqlidirsə — <strong>bütün IP-lər aşağıdaki
+          eyni qaydaya görə yenidən hesablanmalıdır</strong>: şəbəkə ünvanının son oktetini öz şəbəkənə uyğun dəyişib,
+        PC1→.1, PC2→.2, PC3→.3, PC4→.4, Sw1 VLAN1→.5, R1 Gig0/0→ son istifadə oluna bilən ünvan (məs. /24 üçün .254).
+      </div>
+    </section>
+
+    <!-- ===================== SECTION 1 ===================== -->
+    <section class="block">
+      <div class="block-head">
+        <span class="block-num">BÖLMƏ 1</span>
+        <h2>R1 (Router) — IP, SSH və ACL Konfiqurasiyası</h2>
+      </div>
+      <p class="steps">R1 üzərinə klikləyin → CLI bölməsinə keçin → Enter vurun → aşağıdakı bloku köçürüb daxil edin.
+      </p>
+
+      <pre><code>
+<span class="line"><span class="code-text">enable</span></span>
+<span class="line"><span class="code-text">configure terminal</span></span>
+<span class="line"><span class="code-text">hostname <span class="var">R1</span></span><span class="comment">cihazın adı — topologiyada R1-dən fərqli yazılıbsa (məs. R0, Router1) ona uyğun dəyiş</span></span>
+<span class="line"><span class="code-text">interface Gig<span class="var">0/0</span></span><span class="comment">port adı cihazdan asılıdır — bəzi modellərdə Gig0/0/0 ola bilər, topologiyaya bax</span></span>
+<span class="line"><span class="code-text">description <span class="var">Connection to Switch</span></span><span class="comment">description mətni tapşırıqda fərqli istənilə bilər — tam olaraq orda yazılan kimi yaz</span></span>
+<span class="line"><span class="code-text">ip address <span class="var">192.168.10.254</span> <span class="var">255.255.255.0</span></span><span class="comment">IP və mask — öz şəbəkənin son istifadə oluna bilən ünvanı və mask-ı</span></span>
+<span class="line"><span class="code-text">no shutdown</span></span>
+<span class="line"><span class="code-text">exit</span></span>
+<span class="line"><span class="code-text">ip domain name <span class="var">exam.com</span></span><span class="comment">domain adı tapşırıqda fərqli verilə bilər (məs. lab.com, cisco.com)</span></span>
+<span class="line"><span class="code-text">crypto key generate rsa</span></span>
+<span class="line"><span class="code-text"><span class="var">1024</span></span><span class="comment">RSA bit ölçüsü — tapşırıqda 512/2048 kimi fərqli ədəd istənilə bilər, orda yazılanı yaz</span></span>
+<span class="line"><span class="code-text">username <span class="var">admin</span> password <span class="var">admin</span></span><span class="comment">istifadəçi adı/parol — tapşırıqda fərqli verilibsə (məs. cisco/cisco), o cür yaz</span></span>
+<span class="line"><span class="code-text">line vty 0 4</span></span>
+<span class="line"><span class="code-text">transport input ssh</span></span>
+<span class="line"><span class="code-text">exit</span></span>
+<span class="line"><span class="code-text">ip access-list extended <span class="var">R1_SSH_ACL</span></span><span class="comment">ACL adı sərbəstdir, istənilən ad qoya bilərsən, sadəcə aşağıda eyni adı istifadə et</span></span>
+<span class="line"><span class="code-text">permit tcp host <span class="var">192.168.10.1</span> host <span class="var">192.168.10.254</span> eq 22</span><span class="comment">yalnız PC1-in IP-si (SSH-ə icazəli PC) və R1-in öz IP-si</span></span>
+<span class="line"><span class="code-text">permit icmp <span class="var">192.168.10.0</span> <span class="var">0.0.0.255</span> host <span class="var">192.168.10.254</span></span><span class="comment">şəbəkə ünvanı + wildcard mask (mask-ın tərsi) — şəbəkən fərqlidirsə bunu da dəyiş</span></span>
+<span class="line"><span class="code-text">exit</span></span>
+<span class="line"><span class="code-text">interface Gig<span class="var">0/0</span></span></span>
+<span class="line"><span class="code-text">ip access-group <span class="var">R1_SSH_ACL</span> in</span></span>
+<span class="line"><span class="code-text">exit</span></span>
+<span class="line"><span class="code-text">exit</span></span>
+<span class="line"><span class="code-text">write</span></span>
+</code></pre>
+    </section>
+
+    <!-- ===================== SECTION 2 ===================== -->
+    <section class="block">
+      <div class="block-head">
+        <span class="block-num">BÖLMƏ 2</span>
+        <h2>Sw1 (Switch) — PortFast, BPDU Guard, DHCP Snooping, SSH və ACL</h2>
+      </div>
+      <p class="steps">Sw1 üzərinə klikləyin → CLI bölməsinə keçin → Enter vurun → aşağıdakı bloku köçürüb daxil edin.
+      </p>
+
+      <pre><code>
+<span class="line"><span class="code-text">enable</span></span>
+<span class="line"><span class="code-text">configure terminal</span></span>
+<span class="line"><span class="code-text">hostname <span class="var">Sw1</span></span><span class="comment">cihazın adı topologiyada fərqli yazılıbsa (məs. Switch0, SW1) ona uyğun dəyiş, böyük/kiçik hərflərə diqqət et</span></span>
+<span class="line"><span class="code-text">interface fa0/1</span></span>
+<span class="line"><span class="code-text">description <span class="var">PC1</span></span><span class="comment">hansı portda hansı PC bağlıdırsa, description-ı ona uyğun yaz; tapşırıqda hər port üçün ayrıca description tələb olunursa, hər biri üçün eyni qaydada təkrarla (fa0/2 → PC2, fa0/3 → PC3, fa0/4 → PC4)</span></span>
+<span class="line"><span class="code-text">exit</span></span>
+<span class="line"><span class="code-text">interface vlan 1</span></span>
+<span class="line"><span class="code-text">ip address <span class="var">192.168.10.5</span> <span class="var">255.255.255.0</span></span><span class="comment">Sw1-in VLAN1 IP-si — öz cədvəlinə uyğun (şəbəkənin 5-ci usable ünvanı)</span></span>
+<span class="line"><span class="code-text">no shutdown</span></span>
+<span class="line"><span class="code-text">exit</span></span>
+<span class="line"><span class="code-text">ip default-gateway <span class="var">192.168.10.254</span></span><span class="comment">R1-in interfeys IP-si ilə eyni olmalıdır</span></span>
+<span class="line"><span class="code-text">interface range fa0/1-4</span></span><span class="comment">PC-lərin bağlı olduğu port aralığı — topologiyada fərqli port nömrələri varsa (məs. fa0/1-2 və ya fa0/5-8) ona uyğun dəyiş</span>
+<span class="line"><span class="code-text">spanning-tree portfast</span></span>
+<span class="line"><span class="code-text">spanning-tree bpduguard enable</span></span>
+<span class="line"><span class="code-text">exit</span></span>
+<span class="line"><span class="code-text">ip dhcp snooping</span></span>
+<span class="line"><span class="code-text">ip dhcp snooping vlan <span class="var">1</span></span><span class="comment">VLAN nömrəsi — tapşırıqda fərqli VLAN istənilibsə (məs. VLAN 10) dəyiş</span></span>
+<span class="line"><span class="code-text">interface Gig<span class="var">0/0/1</span></span><span class="comment">DHCP server/router-ə bağlı etibarlı port — cihaz modelinə görə Gig0/1 və ya Gig0/0/1 ola bilər, topologiyaya bax</span></span>
+<span class="line"><span class="code-text">ip dhcp snooping trust</span></span>
+<span class="line"><span class="code-text">exit</span></span>
+<span class="line"><span class="code-text">ip domain name <span class="var">exam.com</span></span><span class="comment">R1 ilə eyni domain adı olmalıdır, əgər tapşırıqda fərqli yazılıbsa onu istifadə et</span></span>
+<span class="line"><span class="code-text">crypto key generate rsa</span></span>
+<span class="line"><span class="code-text"><span class="var">1024</span></span><span class="comment">RSA bit ölçüsü — R1-dəki ilə eyni olmalıdır, tapşırıqda dəyişibsə oranı dəyiş</span></span>
+<span class="line"><span class="code-text">username <span class="var">admin</span> password <span class="var">admin</span></span><span class="comment">istifadəçi adı/parol — tapşırıqda fərqlidirsə dəyiş</span></span>
+<span class="line"><span class="code-text">line vty 0 15</span></span><span class="comment">switch-lərdə adətən 0-15 (16 sessiya), router-də 0-4 idi — bu normaldır, dəyişmə</span>
+<span class="line"><span class="code-text">transport input ssh</span></span>
+<span class="line"><span class="code-text">exit</span></span>
+<span class="line"><span class="code-text">ip access-list extended <span class="var">SW1_SSH_ACL</span></span><span class="comment">ACL adı sərbəstdir</span></span>
+<span class="line"><span class="code-text">permit tcp host <span class="var">192.168.10.2</span> host <span class="var">192.168.10.5</span> eq 22</span><span class="comment">yalnız PC2-nin IP-si (SSH-ə icazəli PC) və Sw1-in VLAN1 IP-si</span></span>
+<span class="line"><span class="code-text">permit icmp <span class="var">192.168.10.0</span> <span class="var">0.0.0.255</span> host <span class="var">192.168.10.5</span></span><span class="comment">şəbəkə ünvanı + wildcard mask — şəbəkən fərqlidirsə dəyiş</span></span>
+<span class="line"><span class="code-text">exit</span></span>
+<span class="line"><span class="code-text">interface vlan 1</span></span>
+<span class="line"><span class="code-text">ip access-group <span class="var">SW1_SSH_ACL</span> in</span></span>
+<span class="line"><span class="code-text">exit</span></span>
+<span class="line"><span class="code-text">exit</span></span>
+<span class="line"><span class="code-text">write</span></span>
+</code></pre>
+    </section>
+
+    <!-- ===================== SECTION 3 ===================== -->
+    <section class="block">
+      <div class="block-head">
+        <span class="block-num">BÖLMƏ 3</span>
+        <h2>Son Cihazların (PC1–PC4) IP Konfiqurasiyası</h2>
+      </div>
+      <p class="steps">Hər bir PC üçün: PC-yə klikləyin → Desktop → IP Configuration → məlumatları yazın.</p>
+
+      <div class="pc-grid">
+        <div class="pc-card">
+          <h3>PC1</h3>
+          <div>IP Address: <span class="var">192.168.10.1</span></div>
+          <div>Subnet Mask: <span>255.255.255.0</span></div>
+          <div>Gateway: <span class="var">192.168.10.254</span></div>
+        </div>
+        <div class="pc-card">
+          <h3>PC2</h3>
+          <div>IP Address: <span class="var">192.168.10.2</span></div>
+          <div>Subnet Mask: <span>255.255.255.0</span></div>
+          <div>Gateway: <span class="var">192.168.10.254</span></div>
+        </div>
+        <div class="pc-card">
+          <h3>PC3</h3>
+          <div>IP Address: <span class="var">192.168.10.3</span></div>
+          <div>Subnet Mask: <span>255.255.255.0</span></div>
+          <div>Gateway: <span class="var">192.168.10.254</span></div>
+        </div>
+        <div class="pc-card">
+          <h3>PC4</h3>
+          <div>IP Address: <span class="var">192.168.10.4</span></div>
+          <div>Subnet Mask: <span>255.255.255.0</span></div>
+          <div>Gateway: <span class="var">192.168.10.254</span></div>
+        </div>
+      </div>
+
+      <div class="warn-box">
+        <strong>Ümumi qeyd:</strong> Sarı rənglə işarələnmiş (<span class="var">belə</span>) hər bir dəyər —
+        IP ünvanları, hostname-lər, description mətnləri, port nömrələri, ACL adları, domain adı, RSA ölçüsü,
+        istifadəçi adı/parol, VLAN nömrəsi — sənin öz tapşırığındaki topologiya və cədvələ görə dəyişə bilər.
+        Hər addımı icra etməzdən əvvəl öz tapşırıq vərəqindəki müvafiq dəyəri yoxla və yalnız fərqlənən hissəni
+        dəyiş, qalan əmr strukturuna (sintaksisə) toxunma.
+      </div>
+    </section>
+
+    <footer>
+      Bu səhifə yalnız PDF-dəki məzmunun strukturlaşdırılmış göstərilməsidir — heç bir əlavə əmr və ya fərziyyə
+      əlavə olunmayıb. PDF-i yuxarıdaki düymə ilə yüklə bilərsən.
+    </footer>
+
+  </div>
+</body>
+
+</html>
