@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cisco İmtahan Bələdçisi</title>
+  <style>
+    body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: #0b0f14; color: #d7e1ea; font-family: system-ui, sans-serif; }
+    .wrapper { max-width: 740px; width: 100%; padding: 32px; }
+    h1 { margin: 0 0 16px; font-size: clamp(2rem, 4vw, 3rem); }
+    p { margin: 0 0 28px; color: #8fa3b4; font-size: 1rem; }
+    .cards { display: grid; gap: 16px; }
+    .card { display: block; text-decoration: none; padding: 22px 24px; border: 1px solid #1d2733; border-radius: 18px; background: #111720; transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease; }
+    .card:hover { transform: translateY(-2px); border-color: #39d6c8; box-shadow: 0 15px 40px rgba(0,0,0,.25); }
+    .card strong { display: block; font-size: 1.08rem; margin-bottom: 8px; }
+    .card span { color: #8fa3b4; font-size: .95rem; }
+    .note { margin-top: 32px; color: #7d8a99; font-size: .95rem; }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <h1>Cisco İmtahan Bələdçisi</h1>
+    <p>Vercel kök adresinə daxil olduqda bu səhifə yüklənəcək. Hər iki HTML faylı buradan seçə bilərsiniz.</p>
+    <div class="cards">
+      <a class="card" href="cisco_imtahan.html">
+        <strong>R1 / Sw1 Konfiqurasiyası</strong>
+        <span>Birinci imtahan variantını açmaq üçün klikləyin.</span>
+      </a>
+      <a class="card" href="cisco_imtahan_v2.html">
+        <strong>Variant 2: Port Security / SSH / PAT-NAT</strong>
+        <span>İkinci variantı açmaq üçün klikləyin.</span>
+      </a>
+    </div>
+    <div class="note">Əgər birbaşa fayla keçmək istəyirsinizsə, URL-də sonuna <code>/cisco_imtahan.html</code> və ya <code>/cisco_imtahan_v2.html</code> əlavə edin.</div>
+  </div>
+</body>
+</html>
