@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cisco İmtahan HTML — Hazır Prompt (Copy)</title>
+<style>
+  :root{
+    --bg:#0b0f14; --panel:#111720; --panel2:#0e141c; --line:#1d2733;
+    --txt:#d7e1ea; --dim:#7d8a99; --cyan:#39d6c8; --amber:#ffb454;
+    --mono:'JetBrains Mono','Fira Code',Consolas,monospace; --sans:'Inter',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--sans);line-height:1.55;}
+  header{padding:34px 6vw 20px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#0d131a,#0b0f14);}
+  header .tag{font-family:var(--mono);color:var(--cyan);font-size:12px;letter-spacing:.12em;text-transform:uppercase;}
+  header h1{margin:6px 0 6px;font-size:24px;font-weight:700;}
+  header p{color:var(--dim);max-width:780px;margin:0;font-size:13.5px;}
+  main{padding:26px 6vw 80px;max-width:980px;margin:0 auto;}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px 20px;margin-bottom:20px;}
+  .panel h2{margin:0 0 10px;font-size:16px;color:var(--cyan);}
+  .cmd-wrap{position:relative;}
+  pre#promptBox{
+    background:#070a0d;border:1px solid var(--line);border-radius:8px;
+    padding:46px 16px 16px;font-family:var(--mono);font-size:13px;color:#cfe8e2;
+    white-space:pre-wrap;word-break:break-word;margin:0;max-height:70vh;overflow-y:auto;line-height:1.6;
+  }
+  .copy-btn{
+    position:absolute;top:10px;right:10px;background:var(--cyan);color:#04201d;border:none;
+    font-weight:700;font-size:13px;padding:8px 16px;border-radius:7px;cursor:pointer;font-family:var(--sans);z-index:2;
+  }
+  .copy-btn:hover{background:#5fe6da;}
+  .copy-btn.copied{background:var(--amber);}
+  ul.fixlist{font-size:13.5px;color:var(--dim);padding-left:20px;margin:0;}
+  ul.fixlist li{margin-bottom:6px;}
+  ul.fixlist b{color:var(--txt);}
+  footer{text-align:center;color:var(--dim);font-size:12px;padding:20px 0 50px;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="tag">Vercel Static Page · Prompt Container</div>
+  <h1>Cisco İmtahan Bələdçisi — Düzəlişli Prompt</h1>
+  <p>Aşağıdaki tam prompt-u "Copy" düyməsi ilə kopyala və yeni chat-a yapışdır — iki HTML faylındakı (port aralığı, router/switch komandalarının qarışması, ICMP ACL nümunəsi) problemləri aradan qaldıran tələblərlə.</p>
+</header>
+
+<main>
+
+  <div class="panel">
+    <h2>Bu prompt nəyi düzəldir</h2>
+    <ul class="fixlist">
+      <li><b>Port aralıqları</b> — "Fa0/1-4" formatı yoxdur, hər port ayrı-ayrı (Fa0/1, Fa0/2, Fa0/3, Fa0/4) yazılacaq.</li>
+      <li><b>CLI ayrımı</b> — Router əmrləri və Switch əmrləri heç vaxt eyni komanda blokunda qarışmayacaq, hər cihaz üçün ayrıca pre/copy bloku olacaq.</li>
+      <li><b>ICMP ACL nümunəsi</b> — bir PC-nin ping ata bilməsi üçün <code>permit icmp 192.168.10.0 0.0.0.255 host 192.168.10.254 echo</code> formatı əsas nümunə kimi istifadə olunacaq.</li>
+      <li><b>Copy düyməsi</b> — hər bir komanda bloku üçün ayrıca, işləyən "⧉ Copy" düyməsi olacaq.</li>
+    </ul>
+  </div>
+
+  <div class="panel">
+    <h2>Hazır Prompt</h2>
+    <div class="cmd-wrap">
+      <button class="copy-btn" onclick="copyPrompt(this)">⧉ Copy Prompt</button>
+      <pre id="promptBox">Sən Cisco Packet Tracer və şəbəkə konfiqurasiyası üzrə ekspertsən. Sənə əvvəlki iki HTML faylını (cisco_imtahan.html və cisco_imtahan_v2.html) nümunə olaraq atıram. Hər ikisini AŞAĞIDAKİ düzəlişlərlə YENİDƏN yaz (struktur, input cədvəli, IP hesablama məntiqi və dizayn eyni qalsın, yalnız bu problemləri fix et):
+
+1) PORT ARALIQLARI YASAQDIR.
+   "FastEthernet0/1-4" və ya "interface range FastEthernet0/1-4" kimi defisli aralıq YAZILMASIN.
+   Əvəzinə hər port ayrı-ayrı, tam adı ilə yazılsın:
+     interface FastEthernet0/1
+      ...komandalar...
+      exit
+     interface FastEthernet0/2
+      ...komandalar...
+      exit
+   (və s. hər port üçün ayrıca blok). expandRange()/"interface range" funksiyalarından İSTİFADƏ ETMƏ — JS-də portları array kimi tək-tək render et, "interface range" sintaksisini heç yerdə işlətmə.
+
+2) ROUTER VƏ SWITCH KOMANDALARI HEÇ VAXT EYNİ BLOKDA QARIŞMASIN.
+   Əvvəlki fayllarda bəzi step-lərdə Router və Switch əmrləri bir pre/cmd blokunda ardıcıl yazılıb (məs. NAT inside Router-də, sonra elə həmin blokda Switch əmri). Bunu fix et:
+   - Hər step-in "📍 Harada" sətri YALNIZ bir cihaz/bir rejim göstərsin (məs. "R1 CLI-də, global config" və ya "Sw1 CLI-də, interface Fa0/1").
+   - Əgər bir tapşırıq həm Router, həm Switch tərəfində əmr tələb edirsə, bunu İKİ AYRI step-ə böl: biri "Router CLI-də" başlığı ilə öz pre/copy-button blokunda, digəri "Switch CLI-də" başlığı ilə tamam ayrı pre/copy-button blokunda. Heç bir vəziyyətdə bir <pre class="cmd"> daxilində həm router, həm switch əmri olmasın.
+
+3) ICMP ÜÇÜN STANDART NÜMUNƏ FORMAT.
+   Bir konkret PC-nin Router/Switch-i ping edə bilməsini təmin edən ACL qaydalarında məhz bu formatdan istifadə et (network + wildcard + host + echo):
+     access-list <NÖMRƏ> permit icmp <ŞƏBƏKƏ> <WILDCARD> host <HƏDƏF_IP> echo
+   Nümunə: permit icmp 192.168.10.0 0.0.0.255 host 192.168.10.254 echo
+   Extended ACL-lərdə "echo" açar sözünü unutma (yalnız ping-echo-request icazəsi, echo-reply üçün ayrıca "echo-reply" əlavə edilə bilər, amma defolt olaraq "echo" kifayətdir, lazım gələrsə hər iki istiqaməti DÜŞÜN və izah et).
+
+4) HƏR KOMANDA BLOKUNUN BAŞLIĞI VƏ COPY DÜYMƏSİ.
+   Hər bir <pre class="cmd"> blokunun üstündə:
+   - Hansı cihaz/rejim olduğunu göstərən kiçik başlıq (məs. "R1 — global config" və ya "Sw1 — Fa0/1")
+   - Sağ yuxarı küncdə işləyən "⧉ Copy" düyməsi (clipboard.writeText, pre.textContent-i kopyalasın, kopyalandıqdan sonra "✓ Kopyalandı" göstərsin və 1.4 saniyə sonra əvvəlki mətnə qayıtsın)
+   olmalıdır — bu artıq əvvəlki fayllarda var, sadəcə indi HƏR AYRI router/switch blokunun da öz başlığı və öz copy düyməsi olduğundan əmin ol (3-cü bənddə bölünən step-lərin hər ikisində ayrıca düymə).
+
+5) DİGƏR HƏR ŞEY EYNİ QALSIN:
+   - Yuxarıda "Dəyişə Bilən Parametrlər" cədvəli (interfeys adları, hostname, subnet, port-security, SSH, ACL nömrəsi və s. input/dropdown).
+   - IP-lər avtomatik hesablanmalıdır (network+mask əsasında 1-ci/2-ci/3-cü/4-cü/sonuncu usable) — əl ilə IP yazılmamalıdır.
+   - Tünd fon, yüksək kontrast, monospace komandalar, mobil-responsive dizayn.
+   - Hər step: nömrə+başlıq, 📍 Harada (bir cihaz/bir rejim), tam CLI əmrləri (kod blokunda, dəyişən dəyərlər fərqli rənglə), yalnız zəruri olduqda 1 cümləlik xəbərdarlıq. Uzun "niyə vacibdir" izahları, dərslik mətni YOX.
+   - Sonda yalnız ping/show əmrləri olan qısa "Yoxlama" bölməsi.
+
+Hər iki faylı (cisco_imtahan.html və cisco_imtahan_v2.html) bu qaydalarla TAM YENİDƏN yaz və hər birini ayrıca tam self-contained HTML kodu kimi ver.</pre>
+    </div>
+  </div>
+
+  <footer>Bu səhifə statikdir — Vercel-ə birbaşa deploy edilə bilər (heç bir backend tələb olunmur).</footer>
+</main>
+
+<script>
+function copyPrompt(btn){
+  const pre = document.getElementById('promptBox');
+  navigator.clipboard.writeText(pre.textContent).then(()=>{
+    const old = btn.textContent;
+    btn.textContent = '✓ Kopyalandı';
+    btn.classList.add('copied');
+    setTimeout(()=>{ btn.textContent = old; btn.classList.remove('copied'); }, 1400);
+  });
+}
+</script>
+
+</body>
+</html>
